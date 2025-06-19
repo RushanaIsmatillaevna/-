@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Админ | GreenLeaf Market</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #f5fff7;
+    }
+
+    header {
+      background-color: #28a745;
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background-color: white;
+      border-radius: 50%;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    nav a {
+      margin-left: 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .container h2 {
+      color: #1b5e20;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .product-list {
+      margin-top: 30px;
+    }
+
+    .product-item {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .product-item img {
+      width: 100px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    footer {
+      background-color: #28a745;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    #auth-block {
+      text-align: center;
+    }
+
+    #auth-block input {
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌿</div>
+      GreenLeaf
+    </div>
+    <nav>
+      <a href="index.html">Главная</a>
+      <a href="admin.html">Админ</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- 🔐 Блок ввода пароля -->
+    <div id="auth-block">
+      <h2>Введите пароль администратора</h2>
+      <input type="password" id="adminPass" placeholder="Пароль">
+      <br><br>
+      <button onclick="checkPassword()">Войти</button>
+    </div>
+
+    <!-- ✅ Админ-панель (скрыта по умолчанию) -->
+    <div id="admin-panel" style="display: none;">
+      <h2>Добавить товар</h2>
+      <form id="productForm">
+        <input type="file" id="image" required>
+        <input type="text" id="name" placeholder="Название товара" required>
+        <textarea id="description" placeholder="Описание товара" required></textarea>
+        <button type="submit">Добавить</button>
+      </form>
+
+      <div class="product-list" id="adminProducts">
+        <h2 style="margin-top: 40px;">Товары</h2>
+        <!-- Список товаров -->
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 GreenLeaf Market. Все права защищены.
+  </footer>
+
+  <script>
+    const password = "GL#92!kT$uXq";
+
+    function checkPassword() {
+      const input = document.getElementById('adminPass').value;
+      if (input === password) {
+        document.getElementById('auth-block').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'block';
+        loadAdminProducts();
+      } else {
+        alert("Неверный пароль");
+      }
+    }
+
+    // Добавление товара
+    document.getElementById('productForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const file = document.getElementById('image').files[0];
+      const name = document.getElementById('name').value;
+      const description = document.getElementById('description').value;
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const image = reader.result;
+        const product = { name, description, image };
+
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        products.push(product);
+        localStorage.setItem('products', JSON.stringify(products));
+        alert("Товар добавлен!");
+        document.getElementById('productForm').reset();
+        loadAdminProducts();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Загрузка и отображение товаров в админке
+    function loadAdminProducts() {
+      const container = document.getElementById('adminProducts');
+      const products = JSON.parse(localStorage.getItem('products')) || [];
+      container.innerHTML = '<h2 style="margin-top: 40px;">Товары</h2>';
+
+      products.forEach((product, index) => {
+        const item = document.createElement('div');
+        item.className = 'product-item';
+        item.innerHTML = `
+          <img src="${product.image}">
+          <div class="product-info">
+            <strong>${product.name}</strong><br>
+            <small>${product.description}</small>
+          </div>
+          <button onclick="deleteProduct(${index})">Удалить</button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Удаление товара
+    function deleteProduct(index) {
+      if (confirm("Удалить этот товар?")) {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        products.splice(index, 1);
+        localStorage.setItem('products', JSON.stringify(products));
+        loadAdminProducts();
+      }
+    }
+  </script>
+
+</body>
+</html>
